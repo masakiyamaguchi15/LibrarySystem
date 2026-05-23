@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}図書の返却 | 図書館貸出システム{% endblock %}
+
+{% block content %}
+<div>
+    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'menu' %}" class="btn btn-secondary">← メニューへ</a>
+        <h2>図書の返却手続き (返却窓口)</h2>
+    </div>
+
+    <div class="glass-card" style="max-width: 500px; margin: 0 auto;">
+        <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem; text-align: center;">返却される図書の蔵書コードを読み込みます。</h3>
+
+        <form method="POST" action="{% url 'return_book' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="return-copy-input">蔵書コピーID (例：C-0004)</label>
+                <input 
+                    id="return-copy-input"
+                    type="text" 
+                    name="copy_id"
+                    class="form-input" 
+                    required 
+                    placeholder="C-0004" 
+                    style="text-align: center; font-size: 1.3rem; font-family: var(--font-display); letter-spacing: 0.05em;"
+                />
+                <div class="form-helper" style="text-align: center;">
+                    現在貸出中の <code>C-0004</code> を入力すると、返却処理が実行されます。
+                </div>
+            </div>
+
+            <button id="return-submit-btn" type="submit" class="btn btn-success" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                <!-- Return SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M12 17h.01"/><path d="m8 12 4 4 4-4"/></svg>
+                返却処理を実行する
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

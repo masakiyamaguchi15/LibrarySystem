@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}蔵書管理 | 図書館貸出システム{% endblock %}
+
+{% block content %}
+<div>
+    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'menu' %}" class="btn btn-secondary">← メニューへ</a>
+        <h2>蔵書（目録＆物理コピー）登録窓口</h2>
+    </div>
+
+    <div class="grid-3" style="align-items: start;">
+        <!-- Add Book Form -->
+        <div class="glass-card" style="grid-column: span 1;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; font-weight: 600;">新着書籍の新規登録</h3>
+            
+            <form method="POST" action="{% url 'book_mgmt' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="book-isbn">ISBNコード (13桁)</label>
+                    <input 
+                        id="book-isbn"
+                        type="text" 
+                        name="isbn"
+                        class="form-input" 
+                        placeholder="9784798157573" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="book-title">書名</label>
+                    <input 
+                        id="book-title"
+                        type="text" 
+                        name="title"
+                        class="form-input" 
+                        placeholder="リーダブルコード" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="book-author">著者名</label>
+                    <input 
+                        id="book-author"
+                        type="text" 
+                        name="author"
+                        class="form-input" 
+                        placeholder="Dustin Boswell" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="book-price">本体価格 (円)</label>
+                    <input 
+                        id="book-price"
+                        type="number" 
+                        name="price"
+                        class="form-input" 
+                        placeholder="2600" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="book-publisher">出版社</label>
+                    <input 
+                        id="book-publisher"
+                        type="text" 
+                        name="publisher"
+                        class="form-input" 
+                        placeholder="丸善出版" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="book-category">カテゴリ</label>
+                    <select 
+                        id="book-category"
+                        name="category"
+                        class="form-select"
+                    >
+                        <option value="IT・技術">IT・技術</option>
+                        <option value="文学">文学</option>
+                        <option value="ビジネス">ビジネス</option>
+                        <option value="サイエンス">サイエンス</option>
+                        <option value="教育">教育</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+
+                <button id="book-submit-btn" type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <!-- Add SVG Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    目録に登録 (1冊目コピー付加)
+                </button>
+            </form>
+        </div>
+
+        <!-- Book Catalogue Table with Copy Add Buttons -->
+        <div class="glass-card" style="grid-column: span 2;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; font-weight: 600;">登録書籍一覧 ＆ 蔵書増刷</h3>
+            
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>書名</th>
+                            <th>著者</th>
+                            <th>出版社</th>
+                            <th>蔵書数</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in books_list %}
+                            <tr>
+                                <td style="font-family: var(--font-display); font-size: 0.85rem;">{{ b.isbn }}</td>
+                                <td>
+                                    <strong style="color: #fff;">{{ b.title }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ b.category }}</div>
+                                </td>
+                                <td>{{ b.author }}</td>
+                                <td>{{ b.publisher }}</td>
+                                <td>
+                                    <strong>{{ b.total_copies }}</strong> 冊
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">(貸出可能: {{ b.available_copies }})</div>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{% url 'add_copy' b.isbn %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button 
+                                            type="submit" 
+                                            class="btn btn-secondary" 
+                                            style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"
+                                        >
+                                            <!-- Add SVG -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                                            物理コピー(増刷)を追加
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                    目録に登録されている書籍はありません。
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

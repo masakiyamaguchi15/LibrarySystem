@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}司書ログイン | 図書館貸出システム{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="glass-card login-card">
+        <div class="login-header">
+            <h2>司書ログイン窓口</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">図書館システムへログインします。</p>
+        </div>
+
+        <div class="login-demo-info">
+            🔑 <strong>デモ用アカウント:</strong><br />
+            ユーザー名: <code style="color: #fff; background: #000; padding: 0.1rem 0.3rem; border-radius: 4px;">admin</code><br />
+            パスワード: <code style="color: #fff; background: #000; padding: 0.1rem 0.3rem; border-radius: 4px;">password</code>
+        </div>
+
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="login-username">ユーザー名 / ID</label>
+                <input 
+                    id="login-username"
+                    type="text" 
+                    name="username"
+                    class="form-input" 
+                    required 
+                    placeholder="admin"
+                />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="login-password">パスワード</label>
+                <input 
+                    id="login-password"
+                    type="password" 
+                    name="password"
+                    class="form-input" 
+                    required 
+                    placeholder="••••••••"
+                />
+            </div>
+
+            <button id="login-submit-btn" type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; justify-content: center;">
+                <!-- Login SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                ログイン認証
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

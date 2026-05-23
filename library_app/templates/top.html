@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}つくばアカデミア図書館貸出システム{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 4rem 1rem; max-width: 800px; margin: 0 auto;">
+    <h2 style="font-family: var(--font-display); fontSize: 3rem; font-weight: 800; margin-bottom: 1.5rem; background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        つくばアカデミア図書館
+    </h2>
+    <p style="color: var(--text-secondary); font-size: 1.2rem; line-height: 1.8; margin-bottom: 3rem;">
+        本システムは、UMLモデリングおよびオブジェクト指向分析・設計に基づき構築された、図書館の高度な蔵書管理、利用者管理、および貸出・返却手続きを行うためのスマート管理システムです。
+    </p>
+    <div style="display: flex; gap: 1.5rem; justify-content: center;">
+        <a href="{% url 'search' %}" id="top-search-btn" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+            <!-- Search Icon SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            蔵書を検索する
+        </a>
+        
+        {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" id="top-login-btn" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <!-- Login Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                司書ログイン窓口
+            </a>
+        {% else %}
+            <a href="{% url 'menu' %}" id="top-menu-btn" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem; border-color: var(--primary-color);">
+                <!-- Dashboard Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                司書メニューへ戻る
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="glass-card" style="margin-top: 4rem; padding: 1.5rem; text-align: left;">
+        <h3 style="font-size: 1rem; color: var(--warning-color); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <!-- Warning SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            デモ環境のご案内
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+            画面左下の<strong>「⚙️ デモ検証」</strong>ボタンをクリックすると、仕様書通りの「正常な貸出手続き」「利用停止ユーザーによる貸出拒否」「返却処理」といったテストケースをワンクリックで実行できるコントロールパネルが開きます。ぜひ動作検証にお役立てください。
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}利用者管理 | 図書館貸出システム{% endblock %}
+
+{% block content %}
+<div>
+    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'menu' %}" class="btn btn-secondary">← メニューへ</a>
+        <h2>利用者登録・管理窓口</h2>
+    </div>
+
+    <div class="grid-2">
+        <!-- Register User Form -->
+        <div class="glass-card">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; font-weight: 600;">新規利用者カード発行</h3>
+            
+            <form method="POST" action="{% url 'user_mgmt' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="user-name">氏名</label>
+                    <input 
+                        id="user-name"
+                        type="text" 
+                        name="name"
+                        class="form-input" 
+                        placeholder="山田 太郎" 
+                        required 
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="user-address">現住所</label>
+                    <input 
+                        id="user-address"
+                        type="text" 
+                        name="address"
+                        class="form-input" 
+                        placeholder="東京都品川区大井1-2-3" 
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="user-phone">電話番号</label>
+                    <input 
+                        id="user-phone"
+                        type="text" 
+                        name="phone"
+                        class="form-input" 
+                        placeholder="090-1234-5678" 
+                        required
+                    />
+                    <div class="form-helper">ハイフン有り無しどちらでも入力可能です。</div>
+                </div>
+
+                <button id="user-submit-btn" type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <!-- Add SVG Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    利用者として登録 (カード発行)
+                </button>
+            </form>
+        </div>
+
+        <!-- Live Users List -->
+        <div class="glass-card" style="max-height: 600px; overflow-y: auto;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; font-weight: 600;">登録利用者名簿</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                {% for u in users_list %}
+                    <div class="user-card-badge">
+                        <div class="user-card-glow"></div>
+                        <div class="user-card-header">
+                            <span class="user-card-logo">つくばアカデミア図書館</span>
+                            <span class="badge {% if u.status == 'Active' %}badge-success{% else %}badge-danger{% endif %}">
+                                {{ u.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <div class="user-card-id">{{ u.user_id }}</div>
+                        
+                        <div class="user-card-footer">
+                            <div>
+                                <div class="user-card-name">{{ u.name }}</div>
+                                <div class="user-card-phone">{{ u.phone }}</div>
+                            </div>
+
+                            <!-- Barcode representation -->
+                            <div class="barcode-mock">
+                                <div class="barcode-line wide"></div>
+                                <div class="barcode-line thin"></div>
+                                <div class="barcode-line"></div>
+                                <div class="barcode-line thin"></div>
+                                <div class="barcode-line wide"></div>
+                                <div class="barcode-line"></div>
+                                <div class="barcode-line thin"></div>
+                                <div class="barcode-line wide"></div>
+                            </div>
+                        </div>
+
+                        <!-- Suspension Toggle Utility Form -->
+                        <form method="POST" action="{% url 'toggle_user' u.user_id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button 
+                                type="submit"
+                                class="btn btn-text"
+                                style="
+                                    position: absolute; 
+                                    top: 1rem; 
+                                    right: 6.5rem; 
+                                    font-size: 0.75rem; 
+                                    padding: 0.2rem 0.5rem;
+                                    background: rgba(0,0,0,0.5);
+                                    border-radius: 4px;
+                                "
+                            >
+                                {% if u.status == 'Active' %}利用停止{% else %}停止解除{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                {% empty %}
+                    <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                        登録されている利用者はいません。
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
