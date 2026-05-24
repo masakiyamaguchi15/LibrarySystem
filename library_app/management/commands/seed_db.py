@@ -146,8 +146,8 @@ class Command(BaseCommand):
             copy = BookCopy.objects.get(copy_id='C-0004')
             user = LibraryUser.objects.get(user_id='U-0002')
             
-            # すでに貸出レコードがあるか確認
-            loan_exists = Loan.objects.filter(copy=copy, user=user, status='Active').exists()
+            # すでに貸出レコードがあるか確認（ローンID重複を防ぐ）
+            loan_exists = Loan.objects.filter(loan_id='L-0001').exists()
             if not loan_exists:
                 loan_date = timezone.now() - timedelta(days=6)
                 due_date = loan_date + timedelta(days=14)
@@ -169,5 +169,63 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"貸出中レコード「{loan.loan_id} (利用者: {user.name})」を生成しました。"))
         except (BookCopy.DoesNotExist, LibraryUser.DoesNotExist):
             self.stdout.write(self.style.ERROR('貸出中デモデータの作成に必要なレコードが存在しません。'))
+
+        # 6. 追加のダミー書籍100冊と蔵書コピーの作成
+        self.stdout.write('追加のダミー書籍100冊と蔵書コピーの作成を開始します...')
+        import random
+        categories = ['IT・技術', '文学', 'ビジネス', 'サイエンス', '教育', 'その他']
+        publishers = ['技術評論社', '翔泳社', 'オライリー・ジャパン', '丸善出版', '岩波書店', '新潮社', '集英社', '講談社']
+        
+        titles_by_category = {
+            'IT・技術': ['Python超入門', 'Django Web開発の基本', 'データベース設計完全ガイド', 'Git/GitHub実践入門', 'アルゴリズムとデータ構造', '人工知能と機械学習', 'クラウドインフラ構築入門', 'セキュリティ実践ガイド'],
+            '文学': ['銀河鉄道の夜の旅', '吾輩はAIである', '走れメロスとプログラム', 'こころのデバッグ', '山月記とリファクタリング', '羅生門のコード'],
+            'ビジネス': ['アジャイル仕事術', 'スタートアップの経営戦略', 'ゼロから始めるマネジメント', 'マーケティングの本質', '図解でわかる財務諸表', 'プレゼンテーションの極意'],
+            'サイエンス': ['宇宙の謎を解き明かす', '量子力学とは何か', '面白すぎる物理の話', '基礎から学ぶ有機化学', '生命科学の最前線', '地球温暖化と未来の科学'],
+            '教育': ['アクティブラーニングの実践', '子どもの教育としつけ', 'プログラミング教育の未来', '大人の学び直し英語', 'わかりやすい教え方の技術'],
+            'その他': ['週末の簡単キャンプ飯', '世界一周旅行ガイド', '一眼レフカメラ上達のコツ', '初心者のためのDIY入門', '美味しい珈琲の淹れ方']
+        }
+        
+        authors_suffix = ['太郎', '次郎', '花子', '一郎', '美咲', '健太', 'さくら', '大輔', '優子', '拓海']
+        
+        created_books_count = 0
+        current_index = 1
+        
+        while created_books_count < 100:
+            category = random.choice(categories)
+            title_base = random.choice(titles_by_category[category])
+            title = f"{title_base} (第{random.randint(1, 5)}版) - #{current_index}"
+            author = f"山田 {random.choice(authors_suffix)}"
+            price = random.randint(15, 65) * 100
+            publisher = random.choice(publishers)
+            
+            isbn = f"978-4-99{current_index:07d}"
+            
+            book, b_created = Book.objects.get_or_create(
+                isbn=isbn,
+                defaults={
+                    'title': title,
+                    'author': author,
+                    'price': price,
+                    'publisher': publisher,
+                    'category': category
+                }
+            )
+            
+            if b_created:
+                created_books_count += 1
+                
+                # 蔵書コピーも1つ作成
+                copy_id = f"C-{current_index + 1000:04d}"
+                copy, c_created = BookCopy.objects.get_or_create(
+                    copy_id=copy_id,
+                    defaults={
+                        'book': book,
+                        'status': 'Available'
+                    }
+                )
+            
+            current_index += 1
+
+        self.stdout.write(self.style.SUCCESS(f"追加のダミー書籍100冊と蔵書コピー100個を登録しました。"))
 
         self.stdout.write(self.style.SUCCESS('デモデータの投入が完了しました！'))

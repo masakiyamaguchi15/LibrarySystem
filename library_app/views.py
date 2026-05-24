@@ -11,6 +11,16 @@ import random
 
 from .models import LibraryUser, Book, BookCopy, Loan
 
+def _get_next_sequence_id(queryset, id_field, prefix):
+    max_num = 0
+    for obj in queryset:
+        val = getattr(obj, id_field, '')
+        if val:
+            parts = val.split('-')
+            if len(parts) == 2 and parts[0] == prefix and parts[1].isdigit():
+                max_num = max(max_num, int(parts[1]))
+    return f"{prefix}-{max_num + 1:04d}"
+
 # --- Public Views ---
 
 def top_view(request):
@@ -104,19 +114,7 @@ def user_mgmt_view(request):
                 messages.error(request, '電話番号の桁数が正しくありません。')
             else:
                 # Generate unique user id (U-000X)
-                users = LibraryUser.objects.all()
-                if users.exists():
-                    max_num = 0
-                    for u in users:
-                        try:
-                            num = int(u.user_id.split('-')[1])
-                            if num > max_num:
-                                max_num = num
-                        except (IndexError, ValueError):
-                            pass
-                    next_id = f"U-{max_num + 1:04d}"
-                else:
-                    next_id = "U-0001"
+                next_id = _get_next_sequence_id(LibraryUser.objects.all(), 'user_id', 'U')
                 
                 new_user = LibraryUser.objects.create(
                     user_id=next_id,
@@ -176,12 +174,7 @@ def book_mgmt_view(request):
                     )
                     
                     # Automatically add the first physical copy
-                    copies = BookCopy.objects.all()
-                    if copies.exists():
-                        max_num = max([int(c.copy_id.split('-')[1]) for c in copies])
-                        next_copy_id = f"C-{max_num + 1:04d}"
-                    else:
-                        next_copy_id = "C-0001"
+                    next_copy_id = _get_next_sequence_id(BookCopy.objects.all(), 'copy_id', 'C')
                         
                     BookCopy.objects.create(
                         copy_id=next_copy_id,
@@ -202,12 +195,7 @@ def book_mgmt_view(request):
 def add_copy_view(request, isbn):
     if request.method == 'POST':
         book = get_object_or_404(Book, isbn=isbn)
-        copies = BookCopy.objects.all()
-        if copies.exists():
-            max_num = max([int(c.copy_id.split('-')[1]) for c in copies])
-            next_copy_id = f"C-{max_num + 1:04d}"
-        else:
-            next_copy_id = "C-0001"
+        next_copy_id = _get_next_sequence_id(BookCopy.objects.all(), 'copy_id', 'C')
             
         new_copy = BookCopy.objects.create(
             copy_id=next_copy_id,
@@ -319,12 +307,7 @@ def api_create_loan(request):
         if copy.status != 'Available':
             return JsonResponse({'success': False, 'error': 'この本はすでに貸出中です。'})
             
-        loans = Loan.objects.all()
-        if loans.exists():
-            max_num = max([int(l.loan_id.split('-')[1]) for l in loans if '-' in l.loan_id])
-            next_loan_id = f"L-{max_num + 1:04d}"
-        else:
-            next_loan_id = "L-0001"
+        next_loan_id = _get_next_sequence_id(Loan.objects.all(), 'loan_id', 'L')
             
         # Create Loan record
         new_loan = Loan.objects.create(
@@ -362,9 +345,7 @@ def api_run_scenario(request):
             rand = random.randint(100, 999)
             name = f"川崎 洋介 [デモ{rand}]"
             
-            users = LibraryUser.objects.all()
-            max_num = max([int(u.user_id.split('-')[1]) for u in users]) if users.exists() else 0
-            next_id = f"U-{max_num + 1:04d}"
+            next_id = _get_next_sequence_id(LibraryUser.objects.all(), 'user_id', 'U')
             
             user = LibraryUser.objects.create(
                 user_id=next_id,
@@ -393,9 +374,7 @@ def api_run_scenario(request):
                     active_loan.return_date = timezone.now()
                     active_loan.save()
                     
-            loans = Loan.objects.all()
-            max_num = max([int(l.loan_id.split('-')[1]) for l in loans if '-' in l.loan_id]) if loans.exists() else 0
-            next_loan_id = f"L-{max_num + 1:04d}"
+            next_loan_id = _get_next_sequence_id(Loan.objects.all(), 'loan_id', 'L')
             
             Loan.objects.create(
                 loan_id=next_loan_id,
