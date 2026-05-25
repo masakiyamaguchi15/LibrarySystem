@@ -42,3 +42,6 @@ db.sqlite3
 # OS files
 .DS_Store
 Thumbs.db
+
+# Documentsフォルダ内のPDFファイルを除外
+/Documents/**/*.pdf
